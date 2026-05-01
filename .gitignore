@@ -1,0 +1,6 @@
+# .env Datei niemals committen!
+backend/.env
+backend/finanzen.db
+backend/__pycache__/
+backend/venv/
+*.pyc

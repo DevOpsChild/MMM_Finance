@@ -1,0 +1,8 @@
+{
+  "name": "MMM-Finanzen",
+  "version": "1.0.0",
+  "description": "Wochenbudget, ETF und Sparkonto für MagicMirror²",
+  "main": "MMM-Finanzen.js",
+  "author": "benjamin",
+  "license": "MIT"
+}

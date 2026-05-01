@@ -1,0 +1,15 @@
+[Unit]
+Description=MMM-Finanzen Backend (FastAPI + Telegram Bot)
+After=network.target
+
+[Service]
+Type=simple
+User=benjamin
+WorkingDirectory=/home/benjamin/MMM_Finance/backend
+EnvironmentFile=/home/benjamin/MMM_Finance/backend/.env
+ExecStart=/home/benjamin/MMM_Finance/backend/venv/bin/python main.py
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

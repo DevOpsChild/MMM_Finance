@@ -1,0 +1,132 @@
+.mmm-finanzen {
+  font-family: "Roboto", sans-serif;
+  color: #ffffff;
+  min-width: 280px;
+  max-width: 340px;
+}
+
+.mmm-finanzen .loading {
+  color: #aaaaaa;
+  font-size: 14px;
+  text-align: center;
+  padding: 10px 0;
+}
+
+/* Sektionen */
+.mmm-finanzen .section {
+  margin-bottom: 18px;
+}
+
+.mmm-finanzen .section-title {
+  font-size: 13px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #aaaaaa;
+  margin-bottom: 6px;
+  border-bottom: 1px solid #333;
+  padding-bottom: 4px;
+}
+
+/* Budget */
+.mmm-finanzen .budget-betraege {
+  font-size: 26px;
+  font-weight: bold;
+  margin-bottom: 6px;
+}
+
+.mmm-finanzen .verbleibend {
+  color: #4caf50;
+}
+
+.mmm-finanzen .verbleibend.kritisch {
+  color: #f44336;
+}
+
+.mmm-finanzen .von-gesamt {
+  font-size: 16px;
+  color: #888888;
+}
+
+.mmm-finanzen .ausgegeben {
+  font-size: 12px;
+  color: #aaaaaa;
+  margin-top: 4px;
+}
+
+/* Fortschrittsbalken */
+.mmm-finanzen .progress-wrap {
+  background: #333333;
+  border-radius: 6px;
+  height: 10px;
+  width: 100%;
+  overflow: hidden;
+}
+
+.mmm-finanzen .progress-bar {
+  height: 100%;
+  background: #4caf50;
+  border-radius: 6px;
+  transition: width 0.8s ease;
+}
+
+.mmm-finanzen .progress-bar.warnung {
+  background: #ff9800;
+}
+
+.mmm-finanzen .progress-bar.kritisch {
+  background: #f44336;
+}
+
+/* Einkäufe */
+.mmm-finanzen .einkauf-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  padding: 3px 0;
+  border-bottom: 1px solid #1e1e1e;
+}
+
+.mmm-finanzen .einkauf-notiz {
+  flex: 1;
+  color: #dddddd;
+}
+
+.mmm-finanzen .einkauf-kategorie {
+  flex: 1;
+  text-align: center;
+  font-size: 11px;
+  color: #888888;
+}
+
+.mmm-finanzen .einkauf-betrag {
+  color: #f44336;
+  font-weight: bold;
+  min-width: 70px;
+  text-align: right;
+}
+
+/* Vermögen */
+.mmm-finanzen .verm-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  padding: 3px 0;
+}
+
+.mmm-finanzen .verm-row.gesamt {
+  border-top: 1px solid #444;
+  margin-top: 4px;
+  padding-top: 6px;
+  font-weight: bold;
+  font-size: 15px;
+}
+
+.mmm-finanzen .verm-label {
+  color: #aaaaaa;
+}
+
+.mmm-finanzen .verm-betrag {
+  color: #ffffff;
+}
