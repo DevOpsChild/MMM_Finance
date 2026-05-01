@@ -43,7 +43,7 @@ Module.register("MMM-Finanzen", {
 
     const budgetTitle = document.createElement("div");
     budgetTitle.className = "section-title";
-    budgetTitle.innerText = "💰 Wochenbudget";
+    budgetTitle.innerText = "💰 WOCHENBUDGET";
     budgetSection.appendChild(budgetTitle);
 
     const budgetBetraege = document.createElement("div");
@@ -105,9 +105,9 @@ Module.register("MMM-Finanzen", {
     vermSection.appendChild(vermTitle);
 
     const vermRows = [
-      { label: "ETF", betrag: vermoegen.etf },
-      { label: "Sparkonto", betrag: vermoegen.sparkonto },
-      { label: "Gesamt", betrag: vermoegen.gesamt, bold: true },
+      { label: "📈 ETF", betrag: vermoegen.etf },
+      { label: "🏦 Sparkonto", betrag: vermoegen.sparkonto },
+      { label: "💼 Gesamt", betrag: vermoegen.gesamt, bold: true },
     ];
 
     vermRows.forEach(({ label, betrag, bold }) => {
