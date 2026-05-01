@@ -1,8 +1,9 @@
 .mmm-finanzen {
   font-family: "Roboto", sans-serif;
   color: #ffffff;
-  min-width: 280px;
-  max-width: 340px;
+  min-width: 500px;
+  max-width: 600px;
+  margin: 0 auto;
 }
 
 .mmm-finanzen .loading {
@@ -30,7 +31,7 @@
 
 /* Budget */
 .mmm-finanzen .budget-betraege {
-  font-size: 26px;
+  font-size: 42px;
   font-weight: bold;
   margin-bottom: 6px;
 }
