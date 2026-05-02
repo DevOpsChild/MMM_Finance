@@ -1,0 +1,10 @@
+[Unit]
+Description=Setzt RTC Weckzeit auf 06:30 Uhr (täglich vor Shutdown)
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/rtcwake -m no -t $(date -d "tomorrow 06:30" +%s)
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,14 @@
+[Unit]
+Description=Mouse Mover (verhindert Screensaver)
+After=graphical-session.target
+
+[Service]
+Type=simple
+User=benjamin
+Environment=DISPLAY=:0
+ExecStart=/usr/bin/python3 /home/benjamin/scripts/mouse-mover.py
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=graphical-session.target

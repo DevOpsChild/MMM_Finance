@@ -1,0 +1,17 @@
+[Unit]
+Description=MagicMirror² Autostart (Kiosk-Modus)
+After=graphical-session.target network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=benjamin
+Environment=DISPLAY=:0
+Environment=XAUTHORITY=/home/benjamin/.Xauthority
+WorkingDirectory=/home/benjamin/MagicMirror
+ExecStart=/usr/bin/node --run start:x11
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=graphical-session.target
