@@ -4,11 +4,13 @@
   min-width: 280px;
   max-width: 340px;
   margin: 0 auto;
+  margin-top: -300px;
 }
 
 .mmm-finanzen.budget-mode {
   min-width: 500px;
   max-width: 600px;
+  margin-top: 0;
 }
 
 .mmm-finanzen .loading {
