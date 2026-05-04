@@ -43,6 +43,16 @@ def init_db():
         )
     """)
 
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS freizeit_budget (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            betrag REAL NOT NULL DEFAULT 80.0,
+            ausgegeben REAL NOT NULL DEFAULT 0.0,
+            woche TEXT NOT NULL,
+            erstellt_am TEXT NOT NULL DEFAULT (datetime('now', 'localtime'))
+        )
+    """)
+
     # Initiale ETF und Sparkonto Einträge falls noch nicht vorhanden
     for typ in ("etf", "sparkonto"):
         cur.execute("SELECT id FROM vermoegen WHERE typ = ?", (typ,))
@@ -85,7 +95,37 @@ def ensure_current_week(weekly_budget: float):
     conn.close()
 
 
-def add_einkauf(betrag: float, notiz: str, kategorie: str, weekly_budget: float):
+def ensure_current_week_freizeit(freizeit_budget: float):
+    """Legt Freizeit-Wochen-Eintrag an falls noch nicht vorhanden."""
+    from datetime import date
+    woche = date.today().strftime("%Y-W%W")
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT id FROM freizeit_budget WHERE woche = ?", (woche,))
+    if cur.fetchone() is None:
+        cur.execute(
+            "INSERT INTO freizeit_budget (betrag, ausgegeben, woche) VALUES (?, 0.0, ?)",
+            (freizeit_budget, woche)
+        )
+        conn.commit()
+    conn.close()
+
+
+def get_current_week_freizeit():
+    from datetime import date
+    woche = date.today().strftime("%Y-W%W")
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        "SELECT * FROM freizeit_budget WHERE woche = ? ORDER BY id DESC LIMIT 1",
+        (woche,)
+    )
+    row = cur.fetchone()
+    conn.close()
+    return row
+
+
+def add_einkauf(betrag: float, notiz: str, kategorie: str, weekly_budget: float, freizeit_budget: float = 80.0):
     from datetime import date
     woche = date.today().strftime("%Y-W%W")
     conn = get_connection()
@@ -99,6 +139,21 @@ def add_einkauf(betrag: float, notiz: str, kategorie: str, weekly_budget: float)
         "UPDATE wochen_budget SET ausgegeben = ausgegeben + ? WHERE woche = ?",
         (betrag, woche)
     )
+    # Freizeit-Kategorie auch vom Freizeitbudget abziehen
+    if kategorie.lower() == "freizeit":
+        cur.execute(
+            "SELECT id FROM freizeit_budget WHERE woche = ?", (woche,)
+        )
+        if cur.fetchone() is None:
+            cur.execute(
+                "INSERT INTO freizeit_budget (betrag, ausgegeben, woche) VALUES (?, ?, ?)",
+                (freizeit_budget, betrag, woche)
+            )
+        else:
+            cur.execute(
+                "UPDATE freizeit_budget SET ausgegeben = ausgegeben + ? WHERE woche = ?",
+                (betrag, woche)
+            )
     conn.commit()
     conn.close()
 

@@ -19,7 +19,8 @@ load_dotenv()
 
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN", "")
 TELEGRAM_USER_ID = int(os.getenv("TELEGRAM_USER_ID", "0"))
-WEEKLY_BUDGET = float(os.getenv("WEEKLY_BUDGET", "160.0"))
+WEEKLY_BUDGET = float(os.getenv("WEEKLY_BUDGET", "140.0"))
+WEEKLY_FREIZEIT_BUDGET = float(os.getenv("WEEKLY_FREIZEIT_BUDGET", "80.0"))
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -59,15 +60,21 @@ async def cmd_einkauf(update: Update, context: ContextTypes.DEFAULT_TYPE):
     kategorie = args[2] if len(args) >= 3 else "Sonstiges"
 
     db.ensure_current_week(WEEKLY_BUDGET)
-    db.add_einkauf(betrag, notiz, kategorie, WEEKLY_BUDGET)
+    db.add_einkauf(betrag, notiz, kategorie, WEEKLY_BUDGET, WEEKLY_FREIZEIT_BUDGET)
 
     row = db.get_current_week_budget()
     verbleibend = row["betrag"] - row["ausgegeben"]
 
-    await update.message.reply_text(
+    antwort = (
         f"✅ Einkauf gespeichert: {betrag:.2f}€ – {notiz} ({kategorie})\n"
         f"💰 Verbleibend diese Woche: {verbleibend:.2f}€"
     )
+    if kategorie.lower() == "freizeit":
+        fz = db.get_current_week_freizeit()
+        fz_verbleibend = fz["betrag"] - fz["ausgegeben"]
+        antwort += f"\n🎉 Freizeit verbleibend: {fz_verbleibend:.2f}€"
+
+    await update.message.reply_text(antwort)
 
 
 async def cmd_etf(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -120,12 +127,15 @@ async def cmd_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     db.ensure_current_week(WEEKLY_BUDGET)
+    db.ensure_current_week_freizeit(WEEKLY_FREIZEIT_BUDGET)
     row = db.get_current_week_budget()
+    fz = db.get_current_week_freizeit()
     vermoegen = db.get_vermoegen()
     einkaeufe = db.get_letzte_einkaeufe(5)
 
     ausgegeben = row["ausgegeben"]
     verbleibend = row["betrag"] - ausgegeben
+    fz_verbleibend = fz["betrag"] - fz["ausgegeben"]
 
     einkaeufe_text = "\n".join(
         f"  • {e['betrag']:.2f}€ – {e['notiz']} ({e['kategorie']})"
@@ -142,6 +152,10 @@ async def cmd_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"  Budget:      {row['betrag']:.2f}€\n"
         f"  Ausgegeben:  {ausgegeben:.2f}€\n"
         f"  Verbleibend: {verbleibend:.2f}€\n\n"
+        f"🎉 *Freizeitbudget*\n"
+        f"  Budget:      {fz['betrag']:.2f}€\n"
+        f"  Ausgegeben:  {fz['ausgegeben']:.2f}€\n"
+        f"  Verbleibend: {fz_verbleibend:.2f}€\n\n"
         f"🧾 *Letzte Einkäufe*\n{einkaeufe_text}\n\n"
         f"💼 *Vermögen*\n"
         f"  ETF:         {etf:,.2f}€\n"
@@ -190,13 +204,19 @@ app_api.add_middleware(
 @app_api.get("/api/finanzen")
 def get_finanzen():
     db.ensure_current_week(WEEKLY_BUDGET)
+    db.ensure_current_week_freizeit(WEEKLY_FREIZEIT_BUDGET)
     row = db.get_current_week_budget()
+    fz = db.get_current_week_freizeit()
     vermoegen = db.get_vermoegen()
     einkaeufe = db.get_letzte_einkaeufe(5)
 
     ausgegeben = row["ausgegeben"]
     verbleibend = row["betrag"] - ausgegeben
     prozent = round((ausgegeben / row["betrag"]) * 100) if row["betrag"] > 0 else 0
+
+    fz_ausgegeben = fz["ausgegeben"]
+    fz_verbleibend = fz["betrag"] - fz_ausgegeben
+    fz_prozent = round((fz_ausgegeben / fz["betrag"]) * 100) if fz["betrag"] > 0 else 0
 
     etf = vermoegen.get("etf", {}).get("betrag", 0)
     sparkonto = vermoegen.get("sparkonto", {}).get("betrag", 0)
@@ -208,6 +228,12 @@ def get_finanzen():
             "verbleibend": round(verbleibend, 2),
             "prozent_verbraucht": prozent,
             "woche": row["woche"],
+        },
+        "freizeit": {
+            "gesamt": fz["betrag"],
+            "ausgegeben": round(fz_ausgegeben, 2),
+            "verbleibend": round(fz_verbleibend, 2),
+            "prozent_verbraucht": fz_prozent,
         },
         "einkaeufe": einkaeufe,
         "vermoegen": {
@@ -240,6 +266,7 @@ async def lifespan(fastapi_app: FastAPI):
 
     db.init_db()
     db.ensure_current_week(WEEKLY_BUDGET)
+    db.ensure_current_week_freizeit(WEEKLY_FREIZEIT_BUDGET)
 
     # Telegram Bot initialisieren
     telegram_app = Application.builder().token(TELEGRAM_TOKEN).build()

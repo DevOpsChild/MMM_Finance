@@ -40,6 +40,14 @@
   color: #4caf50;
 }
 
+.mmm-finanzen .verbleibend.freizeit {
+  color: #42a5f5;
+}
+
+.mmm-finanzen .progress-bar.freizeit {
+  background: #42a5f5;
+}
+
 .mmm-finanzen .verbleibend.kritisch {
   color: #f44336;
 }
