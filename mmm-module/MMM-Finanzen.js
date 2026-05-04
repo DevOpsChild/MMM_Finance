@@ -40,6 +40,7 @@ Module.register("MMM-Finanzen", {
       return this._buildFreizeitDom(wrapper);
     }
 
+    wrapper.classList.add("budget-mode");
     const { budget, einkaeufe, vermoegen } = this.finanzData;
 
     // --- Wochenbudget ---

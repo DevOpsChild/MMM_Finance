@@ -1,9 +1,14 @@
 .mmm-finanzen {
   font-family: "Roboto", sans-serif;
   color: #ffffff;
+  min-width: 280px;
+  max-width: 340px;
+  margin: 0 auto;
+}
+
+.mmm-finanzen.budget-mode {
   min-width: 500px;
   max-width: 600px;
-  margin: 0 auto;
 }
 
 .mmm-finanzen .loading {
