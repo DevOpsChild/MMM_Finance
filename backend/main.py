@@ -38,6 +38,7 @@ async def cmd_einkauf(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     /einkauf <betrag> <notiz> [kategorie]
     Beispiel: /einkauf 23,50 Rewe Lebensmittel
+    Zieht nur vom Wochenbudget ab.
     """
     if not _check_user(update):
         return
@@ -57,24 +58,55 @@ async def cmd_einkauf(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     notiz = args[1]
-    kategorie = args[2] if len(args) >= 3 else "Sonstiges"
+    kategorie = args[2] if len(args) >= 3 else "Einkauf"
 
     db.ensure_current_week(WEEKLY_BUDGET)
-    db.add_einkauf(betrag, notiz, kategorie, WEEKLY_BUDGET, WEEKLY_FREIZEIT_BUDGET)
+    db.add_einkauf(betrag, notiz, kategorie, WEEKLY_BUDGET)
 
     row = db.get_current_week_budget()
     verbleibend = row["betrag"] - row["ausgegeben"]
 
-    antwort = (
+    await update.message.reply_text(
         f"✅ Einkauf gespeichert: {betrag:.2f}€ – {notiz} ({kategorie})\n"
         f"💰 Verbleibend diese Woche: {verbleibend:.2f}€"
     )
-    if kategorie.lower() == "freizeit":
-        fz = db.get_current_week_freizeit()
-        fz_verbleibend = fz["betrag"] - fz["ausgegeben"]
-        antwort += f"\n🎉 Freizeit verbleibend: {fz_verbleibend:.2f}€"
 
-    await update.message.reply_text(antwort)
+
+async def cmd_freizeit_ausgabe(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    /freizeit <betrag> <notiz>
+    Beispiel: /freizeit 10,00 Kino
+    Zieht nur vom Freizeitbudget ab.
+    """
+    if not _check_user(update):
+        return
+
+    args = context.args
+    if not args or len(args) < 2:
+        await update.message.reply_text(
+            "Verwendung: /freizeit <betrag> <notiz>\n"
+            "Beispiel: /freizeit 10,00 Kino"
+        )
+        return
+
+    try:
+        betrag = float(args[0].replace(",", "."))
+    except ValueError:
+        await update.message.reply_text("Betrag ungültig.")
+        return
+
+    notiz = args[1]
+
+    db.ensure_current_week_freizeit(WEEKLY_FREIZEIT_BUDGET)
+    db.add_freizeit_ausgabe(betrag, notiz, WEEKLY_FREIZEIT_BUDGET)
+
+    fz = db.get_current_week_freizeit()
+    fz_verbleibend = fz["betrag"] - fz["ausgegeben"]
+
+    await update.message.reply_text(
+        f"🎉 Freizeit gespeichert: {betrag:.2f}€ – {notiz}\n"
+        f"🎉 Freizeit verbleibend: {fz_verbleibend:.2f}€"
+    )
 
 
 async def cmd_etf(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -271,6 +303,7 @@ async def lifespan(fastapi_app: FastAPI):
     # Telegram Bot initialisieren
     telegram_app = Application.builder().token(TELEGRAM_TOKEN).build()
     telegram_app.add_handler(CommandHandler("einkauf", cmd_einkauf))
+    telegram_app.add_handler(CommandHandler("freizeit", cmd_freizeit_ausgabe))
     telegram_app.add_handler(CommandHandler("etf", cmd_etf))
     telegram_app.add_handler(CommandHandler("sparen", cmd_sparen))
     telegram_app.add_handler(CommandHandler("status", cmd_status))

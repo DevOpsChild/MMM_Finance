@@ -139,21 +139,34 @@ def add_einkauf(betrag: float, notiz: str, kategorie: str, weekly_budget: float,
         "UPDATE wochen_budget SET ausgegeben = ausgegeben + ? WHERE woche = ?",
         (betrag, woche)
     )
-    # Freizeit-Kategorie auch vom Freizeitbudget abziehen
-    if kategorie.lower() == "freizeit":
+    conn.commit()
+    conn.close()
+
+
+def add_freizeit_ausgabe(betrag: float, notiz: str, freizeit_budget: float = 80.0):
+    """Zieht nur vom Freizeitbudget ab, nicht vom Wochenbudget."""
+    from datetime import date
+    woche = date.today().strftime("%Y-W%W")
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute(
+        "INSERT INTO einkaeufe (betrag, notiz, kategorie) VALUES (?, ?, ?)",
+        (betrag, notiz, "Freizeit")
+    )
+    cur.execute(
+        "SELECT id FROM freizeit_budget WHERE woche = ?", (woche,)
+    )
+    if cur.fetchone() is None:
         cur.execute(
-            "SELECT id FROM freizeit_budget WHERE woche = ?", (woche,)
+            "INSERT INTO freizeit_budget (betrag, ausgegeben, woche) VALUES (?, ?, ?)",
+            (freizeit_budget, betrag, woche)
         )
-        if cur.fetchone() is None:
-            cur.execute(
-                "INSERT INTO freizeit_budget (betrag, ausgegeben, woche) VALUES (?, ?, ?)",
-                (freizeit_budget, betrag, woche)
-            )
-        else:
-            cur.execute(
-                "UPDATE freizeit_budget SET ausgegeben = ausgegeben + ? WHERE woche = ?",
-                (betrag, woche)
-            )
+    else:
+        cur.execute(
+            "UPDATE freizeit_budget SET ausgegeben = ausgegeben + ? WHERE woche = ?",
+            (betrag, woche)
+        )
     conn.commit()
     conn.close()
 
