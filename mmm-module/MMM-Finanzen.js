@@ -1,10 +1,9 @@
 Module.register("MMM-Finanzen", {
   defaults: {
     apiUrl: "http://localhost:8081/api/finanzen",
-    updateInterval: 60 * 1000, // 60 Sekunden
+    updateInterval: 60 * 1000,
     animationSpeed: 1000,
     maxEinkaeufe: 5,
-    mode: "budget", // "budget" oder "freizeit"
   },
 
   start() {
@@ -34,10 +33,6 @@ Module.register("MMM-Finanzen", {
     if (!this.finanzData) {
       wrapper.innerHTML = '<div class="loading">Lade Finanzdaten...</div>';
       return wrapper;
-    }
-
-    if (this.config.mode === "freizeit") {
-      return this._buildFreizeitDom(wrapper);
     }
 
     wrapper.classList.add("budget-mode");
@@ -127,48 +122,6 @@ Module.register("MMM-Finanzen", {
 
     wrapper.appendChild(vermSection);
 
-    return wrapper;
-  },
-
-  _buildFreizeitDom(wrapper) {
-    const fz = this.finanzData.freizeit;
-    if (!fz) {
-      wrapper.innerHTML = '<div class="loading">Lade Freizeitdaten...</div>';
-      return wrapper;
-    }
-
-    const section = document.createElement("div");
-    section.className = "section";
-
-    const title = document.createElement("div");
-    title.className = "section-title";
-    title.innerText = "🎉 FREIZEITBUDGET";
-    section.appendChild(title);
-
-    const betraege = document.createElement("div");
-    betraege.className = "budget-betraege";
-    betraege.innerHTML =
-      `<span class="verbleibend freizeit ${fz.verbleibend < 10 ? "kritisch" : ""}">${this._formatEur(fz.verbleibend)}</span>` +
-      `<span class="von-gesamt"> / ${this._formatEur(fz.gesamt)}</span>`;
-    section.appendChild(betraege);
-
-    const barWrap = document.createElement("div");
-    barWrap.className = "progress-wrap";
-    const bar = document.createElement("div");
-    bar.className = "progress-bar freizeit";
-    const pct = Math.min(fz.prozent_verbraucht, 100);
-    bar.style.width = pct + "%";
-    if (pct >= 85) bar.classList.add("kritisch");
-    else if (pct >= 60) bar.classList.add("warnung");
-    barWrap.appendChild(bar);
-    section.appendChild(barWrap);
-
-    const ausgegeben = document.createElement("div");
-    ausgegeben.className = "ausgegeben";
-    ausgegeben.innerText = `Ausgegeben: ${this._formatEur(fz.ausgegeben)} (${pct}%)`;
-    section.appendChild(ausgegeben);
-
-    wrapper.appendChild(section);
     return wrapper;
   },
 
